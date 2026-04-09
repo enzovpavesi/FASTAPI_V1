@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pyodbc
 
 # Carrega .env
-load_dotenv("D:/Enzo/api/FastAPI_v1/.env")
+load_dotenv()
 
 # Token do Hugging Face
 HF_TOKEN = os.getenv("HF_TOKEN")
