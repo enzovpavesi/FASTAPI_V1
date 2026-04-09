@@ -213,4 +213,4 @@ function App() {
 
 export default App;
 
-/* para rodar, use: nmp dev run */
+/* para rodar, use: npm run dev */

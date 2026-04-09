@@ -43,15 +43,12 @@ def conectar_bd():
 # Função para salvar na base
 def salvar_resumo(texto, resumo):
     conn = conectar_bd()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        INSERT INTO resumos (texto_original, resumo)
-        VALUES (?, ?)
-    """, texto, resumo)
-
-    conn.commit()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO resumos (texto_original, resumo) VALUES (?, ?)", texto, resumo)
+        conn.commit()
+    finally:
+        conn.close()
 
 # Função que chama a LLM
 def gerar_resumo(texto: str):
@@ -59,17 +56,14 @@ def gerar_resumo(texto: str):
 
     response = requests.post(API_URL, headers=headers, json=payload)
 
-    # DEBUG BRUTO
-    print("STATUS:", response.status_code)
-    print("TEXTO:", response.text)
-
     # verifica se veio resposta válida
     if response.status_code != 200:
         return f"Erro HTTP: {response.status_code}"
 
     try:
         resultado = response.json()
-    except:
+    except Exception as e:
+        print(f"Erro ao parsear JSON: {e}")
         return "Erro: resposta inválida da API (não é JSON)"
 
     # tratamento
@@ -94,11 +88,11 @@ def historico(page: int = 1, limit: int = 5):
     conn = conectar_bd()
     cursor = conn.cursor()
 
-    cursor.execute(f"""
+    cursor.execute("""
         SELECT * FROM resumos
         ORDER BY id DESC
-        OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY
-    """)
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """, offset, limit)
 
     dados = cursor.fetchall()
 
